@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="home">
+<head>
+<meta charset="utf-8">
+<!--
+  Magic Sea: a tap-and-listen learning game for little ones.
+  Five games: counting, colors, letters, shapes, and bubble pop.
+  Everything is voiced, so no reading is needed.
+
+  To change the names, edit CONFIG at the top of the <script> below,
+  or put them in the link instead:   index.html?name=Eevie&brother=Eddie
+-->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Magic Sea">
+<meta name="theme-color" content="#FFE3F1">
+<title>Magic Sea</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='44' fill='%23FF6FB5'/%3E%3Ccircle cx='36' cy='34' r='10' fill='%23fff' opacity='.8'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@700&family=Grandstander:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#23305E; --pearl:#FFF8FC; --pink:#FF4FA3; --blue:#2F6FE0; --sun:#FFD02E;
+  --g1:#A6E4FF; --g2:#45A6EE; --g3:#1D63B8; --edge1:#FFF0F7; --edge2:#1D63B8;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;background:linear-gradient(180deg,var(--edge1) 50%,var(--edge2) 50%)}
+html[data-theme="home"]{--edge1:#FFF0F7;--edge2:#1D63B8}
+html[data-theme="count"]{--g1:#A6E4FF;--g2:#45A6EE;--g3:#1D63B8;--edge1:#A6E4FF;--edge2:#1D63B8}
+html[data-theme="colors"]{--g1:#FFE6F3;--g2:#F6C8F0;--g3:#C3AEFF;--edge1:#FFE6F3;--edge2:#C3AEFF}
+html[data-theme="letters"]{--g1:#C4F6EE;--g2:#6ED6D2;--g3:#2C9BB8;--edge1:#C4F6EE;--edge2:#2C9BB8}
+html[data-theme="shapes"]{--g1:#FFF2CC;--g2:#FFC9DF;--g3:#B79CFF;--edge1:#FFF2CC;--edge2:#B79CFF}
+html[data-theme="bubbles"]{--g1:#6CC0FF;--g2:#2573D1;--g3:#133F86;--edge1:#6CC0FF;--edge2:#133F86}
+html[data-theme="party"]{--g1:#FFD6EC;--g2:#D9C2FF;--g3:#9CCBFF;--edge1:#FFD6EC;--edge2:#9CCBFF}
+
+body{
+  margin:0;height:100%;overflow:hidden;color:var(--ink);
+  font-family:"Grandstander","Chalkboard SE","Comic Sans MS","Trebuchet MS",system-ui,sans-serif;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;
+}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:4px solid var(--sun);outline-offset:4px}
+[hidden]{display:none!important}
+.emoji{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+#app{position:relative;height:100%}
+.screen{position:absolute;inset:0;display:none;flex-direction:column}
+.screen.active{display:flex}
+
+/* ---------- Home: the sea ---------- */
+#home{--f:clamp(92px,23vmin,200px);background:#FFD3E8}
+.sky{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;padding:clamp(10px,3vmin,28px) 16px 0;background:linear-gradient(180deg,#FFF0F7,#FFD3E8)}
+#title{margin:0;font-weight:800;font-size:clamp(2rem,8vmin,4.2rem);line-height:1.08;text-align:center}
+#title .w{display:inline-block;white-space:nowrap}
+#title .l{
+  display:inline-block;color:var(--blue);
+  text-shadow:0 3px 0 #fff,0 -2px 0 #fff,2px 0 0 #fff,-2px 0 0 #fff,0 8px 16px rgba(35,48,94,.18);
+  animation:ripple 3.6s ease-in-out infinite;animation-delay:calc(var(--i) * -.2s);
+}
+#title .l.p{color:var(--pink)}
+.friends{display:flex;align-items:flex-end;justify-content:center;gap:clamp(24px,10vw,120px);margin-top:clamp(4px,2vmin,16px);margin-bottom:calc(var(--f) * -.3)}
+.friend{position:relative}
+.friend svg{position:relative;z-index:1;display:block;width:100%;height:auto}
+.uni{width:var(--f);z-index:2}
+.uni::before{content:"";position:absolute;left:-10%;right:-6%;bottom:-9%;height:26%;background:#FFE2A8;border-radius:50%;box-shadow:inset 0 -6px 0 #F5CB84}
+.mer{width:calc(var(--f) * .78);z-index:0}
+.waves{position:relative;z-index:1;display:block;width:100%;height:clamp(24px,5vmin,44px);margin-bottom:-1px}
+.sea{position:relative;z-index:1;flex:1;display:flex;align-items:center;justify-content:center;padding:8px 12px 16px;background:linear-gradient(180deg,#8ED3FF,#3E9BEA 45%,#1D63B8)}
+.menu{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:clamp(10px,3vmin,28px) clamp(14px,4vmin,40px);max-width:1000px}
+.menu-bubble{background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;--o:clamp(84px,20vmin,160px)}
+.orb{
+  width:var(--o);height:var(--o);border-radius:50%;display:grid;place-items:center;
+  background:
+    radial-gradient(circle at 32% 26%,#fff 0 8%,rgba(255,255,255,.5) 9% 15%,transparent 16%),
+    radial-gradient(circle at 50% 55%,var(--tint) 0 56%,#fff 80%);
+  box-shadow:0 8px 0 rgba(10,40,100,.25),0 14px 24px rgba(10,40,100,.2);
+  animation:bob 4s ease-in-out infinite;animation-delay:var(--d,0s);transition:scale .12s;
+}
+.menu-bubble:active .orb{scale:.92}
+.orb .icon{font-size:calc(var(--o) * .46);line-height:1}
+.orb .icon-letter{font-family:"Andika","Grandstander",sans-serif;font-weight:700;font-size:calc(var(--o) * .56);line-height:1;color:var(--pink)}
+.orb svg{width:58%;height:58%}
+.cap{margin-top:6px;color:#fff;font-weight:800;font-size:clamp(1rem,2.8vmin,1.45rem);text-shadow:0 2px 0 rgba(10,40,100,.4)}
+
+#startOverlay{
+  position:absolute;inset:0;z-index:20;border:0;padding:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  background:rgba(29,99,184,.5);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  color:#fff;transition:opacity .4s;
+}
+#startOverlay.gone{opacity:0;pointer-events:none}
+.play-orb{
+  width:clamp(130px,34vmin,230px);height:clamp(130px,34vmin,230px);border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 32% 26%,#fff 0 8%,transparent 9%),radial-gradient(circle at 50% 55%,#FF6FB5 0 60%,#FFC3E0 82%);
+  box-shadow:0 10px 0 rgba(120,20,70,.3);animation:pulse 1.6s ease-in-out infinite;
+}
+.play-orb svg{width:52%}
+.start-text{font-size:clamp(1.6rem,6vmin,2.6rem);font-weight:800;text-shadow:0 3px 0 rgba(10,40,100,.4)}
+
+/* ---------- Game screen ---------- */
+#game{
+  background:
+    radial-gradient(circle at 8% 80%,rgba(255,255,255,.25) 0 20px,transparent 21px),
+    radial-gradient(circle at 15% 66%,rgba(255,255,255,.2) 0 11px,transparent 12px),
+    radial-gradient(circle at 92% 24%,rgba(255,255,255,.22) 0 15px,transparent 16px),
+    radial-gradient(circle at 86% 36%,rgba(255,255,255,.18) 0 8px,transparent 9px),
+    linear-gradient(180deg,var(--g1),var(--g2) 55%,var(--g3));
+}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px))}
+.round-btn{width:clamp(54px,11vmin,76px);height:clamp(54px,11vmin,76px);border-radius:50%;border:0;padding:0;display:grid;place-items:center;background:var(--pearl);box-shadow:0 5px 0 rgba(10,40,100,.2);transition:scale .12s}
+.round-btn svg{width:58%;height:58%}
+.round-btn:active{scale:.92}
+#stars{display:flex;gap:4px}
+.meter-star{width:clamp(30px,7vmin,48px);height:auto;display:block}
+.meter-star path{fill:rgba(255,255,255,.45);stroke:#fff;stroke-width:6;stroke-linejoin:round}
+.meter-star.on path{fill:var(--sun)}
+.meter-star.pop{animation:pop .5s ease}
+#popCount{height:clamp(50px,10vmin,68px);min-width:clamp(70px,14vmin,100px);padding:0 18px;border-radius:999px;display:grid;place-items:center;background:var(--pearl);font-weight:800;font-size:clamp(1.6rem,5vmin,2.4rem);box-shadow:0 5px 0 rgba(10,40,100,.2)}
+.prompt{display:flex;align-items:center;gap:10px;margin:10px auto 0;width:min(94vw,780px);padding:6px 18px 6px 6px;background:var(--pearl);border-radius:999px;box-shadow:0 6px 0 rgba(10,40,100,.15)}
+.prompt .round-btn{flex:0 0 auto;width:clamp(46px,9vmin,64px);height:clamp(46px,9vmin,64px);background:#E4F0FF;box-shadow:none}
+#promptText{margin:0;font-weight:700;font-size:clamp(1.05rem,3.6vmin,1.75rem);line-height:1.2}
+#target{display:flex;justify-content:center;padding-top:clamp(8px,2vmin,18px)}
+.target-card{display:flex;align-items:center;gap:14px;padding:4px 28px;background:var(--pearl);border-radius:30px;box-shadow:0 8px 0 rgba(20,60,120,.15)}
+.target-card .letter{font-family:"Andika","Grandstander",sans-serif;font-weight:700;font-size:clamp(3.4rem,13vmin,6.5rem);line-height:1.1;color:var(--pink)}
+.target-card .pic{font-size:clamp(2.2rem,9vmin,4.4rem);line-height:1}
+.target-card .word{font-weight:800;font-size:clamp(1.1rem,3.8vmin,1.9rem)}
+.target-card.reveal{animation:pop .5s ease}
+
+.stage{position:relative;z-index:1;flex:1;display:flex;flex-wrap:wrap;align-items:center;align-content:center;justify-content:center;gap:clamp(12px,3.5vmin,36px);padding:12px 16px clamp(40px,10vmin,90px)}
+#guide{position:absolute;z-index:0;right:max(10px,env(safe-area-inset-right,0px));bottom:6px;width:clamp(66px,14vmin,130px);pointer-events:none}
+#guide.is-uni{width:clamp(86px,18vmin,165px)}
+#guide svg{display:block;width:100%;height:auto}
+#guide.dance{animation:dance .9s ease-in-out}
+
+.choice{
+  --size:clamp(96px,min(27vw,30vh),200px);
+  position:relative;width:var(--size);height:var(--size);border:0;padding:0;border-radius:50%;
+  display:grid;place-items:center;
+  background:
+    radial-gradient(circle at 30% 26%,rgba(255,255,255,.95) 0 7%,rgba(255,255,255,.4) 8% 13%,transparent 14%),
+    radial-gradient(circle at 50% 50%,rgba(255,255,255,.16) 0 55%,rgba(255,255,255,.6) 100%);
+  box-shadow:inset 0 0 0 3px rgba(255,255,255,.8),0 12px 24px rgba(10,40,100,.16);
+  animation:bob 3.2s ease-in-out infinite;animation-delay:calc(var(--d,0s) * -1);transition:scale .12s;
+}
+.choice:active{scale:.93}
+.choice svg{width:74%;height:74%;filter:drop-shadow(0 4px 0 rgba(10,40,100,.14))}
+.choice .emoji{font-size:calc(var(--size) * .56);line-height:1}
+.choice .letter{font-family:"Andika","Grandstander",sans-serif;font-weight:700;font-size:calc(var(--size) * .64);line-height:1;color:var(--c,var(--pink));text-shadow:0 4px 0 rgba(255,255,255,.85)}
+.counting .choice{--size:clamp(80px,min(22vw,24vh),150px)}
+.stage.done .choice{opacity:.3;transition:opacity .3s}
+.choice.counted{box-shadow:inset 0 0 0 5px var(--sun),0 0 0 7px rgba(255,208,46,.45)}
+.num{position:absolute;top:-4%;right:-4%;width:40%;height:40%;border-radius:50%;display:grid;place-items:center;background:var(--pink);color:#fff;font-weight:800;font-size:calc(var(--size) * .25);box-shadow:0 3px 0 rgba(120,20,70,.3);animation:pop .35s ease}
+.num:empty{display:none}
+.choice.wiggle{animation:wiggle .5s ease}
+.choice.hint{animation:bob 3.2s ease-in-out infinite,glow 1s ease-in-out infinite}
+.choice.yay{animation:bob 3.2s ease-in-out infinite,yay .7s ease forwards;box-shadow:inset 0 0 0 6px var(--sun),0 0 0 12px rgba(255,208,46,.5)}
+.bignum{position:absolute;inset:0;z-index:3;display:grid;place-items:center;pointer-events:none}
+.bignum span{font-weight:800;font-size:clamp(7rem,38vmin,17rem);line-height:1;color:#fff;text-shadow:0 6px 0 var(--pink),0 12px 30px rgba(10,40,100,.35);animation:pop .55s ease}
+
+.stage.bubbles{display:block;padding:0;overflow:hidden}
+.bubble{
+  position:absolute;bottom:calc(var(--s) * -1.1);width:var(--s);height:var(--s);border:0;padding:0;border-radius:50%;
+  display:grid;place-items:center;
+  background:
+    radial-gradient(circle at 30% 26%,rgba(255,255,255,.95) 0 8%,transparent 9%),
+    radial-gradient(circle at 50% 50%,rgba(255,255,255,.06) 0 50%,rgba(255,255,255,.3) 100%);
+  box-shadow:inset 0 0 0 4px var(--c),inset 0 0 26px var(--c);
+  animation:rise var(--dur) linear forwards;
+}
+.bubble .emoji{font-size:calc(var(--s) * .44);line-height:1}
+
+.spark{position:fixed;z-index:50;pointer-events:none;font-size:clamp(20px,5vmin,34px);transform:translate(-50%,-50%);animation:spark .85s ease-out forwards}
+
+/* ---------- Party ---------- */
+#party{align-items:center;justify-content:center;gap:clamp(8px,2.5vmin,24px);padding:16px;text-align:center;overflow:hidden;background:linear-gradient(180deg,var(--g1),var(--g2) 55%,var(--g3))}
+#party > :not(#confetti){position:relative;z-index:1}
+#confetti{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#confetti span{position:absolute;top:-10vh;animation:fall linear infinite}
+#partyTitle{margin:0;font-weight:800;font-size:clamp(2.6rem,12vmin,6.5rem);line-height:1;color:#fff;text-shadow:0 5px 0 var(--pink),0 10px 24px rgba(35,48,94,.25)}
+.dancers{display:flex;align-items:flex-end;gap:clamp(12px,5vmin,48px)}
+.dancer{animation:dance 1.2s ease-in-out infinite}
+.dancer svg{display:block;width:100%;height:auto}
+.d-uni{width:clamp(110px,27vmin,230px)}
+.d-mer{width:clamp(88px,21vmin,180px);animation-delay:-.6s}
+.party-stars{display:flex;gap:6px}
+.party-actions{display:flex;gap:clamp(24px,8vmin,64px)}
+.big-btn{background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:800;font-size:clamp(1rem,3vmin,1.4rem)}
+.big-btn .orb{--o:clamp(84px,19vmin,136px);animation:none}
+.big-btn:active .orb{scale:.92}
+
+@keyframes bob{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-10px) rotate(var(--r,0deg))}}
+@keyframes wiggle{0%,100%{transform:translateX(0)}20%{transform:translateX(-12px) rotate(-6deg)}40%{transform:translateX(10px) rotate(5deg)}60%{transform:translateX(-7px) rotate(-3deg)}80%{transform:translateX(4px)}}
+@keyframes glow{0%,100%{box-shadow:inset 0 0 0 3px rgba(255,255,255,.8),0 0 0 0 rgba(255,208,46,0)}50%{box-shadow:inset 0 0 0 3px rgba(255,255,255,.8),0 0 0 16px rgba(255,208,46,.6)}}
+@keyframes yay{0%{scale:1}40%{scale:1.22}100%{scale:1.12}}
+@keyframes pop{0%{scale:.3;opacity:0}60%{scale:1.15;opacity:1}100%{scale:1}}
+@keyframes pulse{0%,100%{scale:1}50%{scale:1.08}}
+@keyframes ripple{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes dance{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-18px) rotate(-8deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-12px) rotate(8deg)}}
+@keyframes fall{from{transform:translateY(0) rotate(0)}to{transform:translateY(120vh) rotate(540deg)}}
+@keyframes spark{from{transform:translate(-50%,-50%) scale(1);opacity:1}to{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(.5);opacity:0}}
+@keyframes rise{
+  0%{transform:translate(0,0)}
+  25%{transform:translate(var(--sway),-25vh)}
+  50%{transform:translate(0,-50vh)}
+  75%{transform:translate(calc(var(--sway) * -1),-75vh)}
+  100%{transform:translate(0,calc(-100vh - 180px))}
+}
+@keyframes popped{to{scale:1.6;opacity:0}}
+
+@media (prefers-reduced-motion: reduce){
+  #title .l,.orb,.play-orb,.choice,.dancer,#confetti span{animation:none!important}
+  .choice.wiggle{animation:wiggle .5s ease!important}
+}
+</style>
+</head>
+<body>
+
+<!-- Characters, drawn once and reused everywhere -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="mermaid-art" viewBox="0 0 120 170">
+      <path d="M31 52 C28 24 44 11 60 11 C77 11 93 24 90 52 C94 78 90 98 84 110 L36 110 C29 98 27 78 31 52 Z" fill="#FF6FB5"/>
+      <path d="M44 100 C38 124 43 142 58 152 L69 150 C62 136 70 120 76 100 Z" fill="#33B6C7"/>
+      <path d="M49 114 q4.5 4 9 0 M59 114 q4.5 4 9 0 M50 126 q4.5 4 9 0 M59 126 q4.5 4 9 0 M53 138 q4.5 4 9 0" stroke="#8AE6EF" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <ellipse cx="55" cy="158" rx="13" ry="6.5" transform="rotate(-38 55 158)" fill="#2595B0"/>
+      <ellipse cx="71" cy="157" rx="13" ry="6.5" transform="rotate(30 71 157)" fill="#2595B0"/>
+      <path d="M48 85 Q37 93 40 105" stroke="#FFD9C2" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M72 85 Q86 80 91 66" stroke="#FFD9C2" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <rect x="46" y="75" width="28" height="30" rx="13" fill="#FFD9C2"/>
+      <rect x="45" y="81" width="30" height="11" rx="5.5" fill="#9A5CF5"/>
+      <circle cx="60" cy="50" r="25" fill="#FFD9C2"/>
+      <path d="M34 50 Q35 24 60 24 Q85 24 86 50 Q76 35 62 38 Q48 34 34 50 Z" fill="#FF6FB5"/>
+      <path transform="translate(71 19) scale(.17)" d="M50 6 L61.5 37.5 L95 38 L68.5 58.5 L78 91 L50 72 L22 91 L31.5 58.5 L5 38 L38.5 37.5 Z" fill="#FFD02E" stroke="#fff" stroke-width="8" stroke-linejoin="round"/>
+      <ellipse cx="51" cy="55" rx="3.6" ry="4.6" fill="#23305E"/>
+      <ellipse cx="69" cy="55" rx="3.6" ry="4.6" fill="#23305E"/>
+      <circle cx="52.3" cy="53.3" r="1.3" fill="#fff"/>
+      <circle cx="70.3" cy="53.3" r="1.3" fill="#fff"/>
+      <circle cx="44" cy="63" r="4.5" fill="#FF8FB8" opacity=".6"/>
+      <circle cx="76" cy="63" r="4.5" fill="#FF8FB8" opacity=".6"/>
+      <path d="M54 64 Q60 70 66 64" stroke="#23305E" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="unicorn-art" viewBox="0 0 160 150">
+      <path d="M42 90 C20 82 10 98 16 114 C20 124 28 128 36 124" stroke="#FF6FB5" stroke-width="11" fill="none" stroke-linecap="round"/>
+      <path d="M44 99 C31 97 25 108 29 118" stroke="#5AA9FF" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <g fill="#fff" stroke="#E2D3F4" stroke-width="2">
+        <rect x="50" y="106" width="13" height="32" rx="6.5"/>
+        <rect x="67" y="109" width="13" height="29" rx="6.5"/>
+        <rect x="91" y="109" width="13" height="29" rx="6.5"/>
+        <rect x="107" y="106" width="13" height="32" rx="6.5"/>
+      </g>
+      <g fill="#FF9CCB">
+        <rect x="50" y="130" width="13" height="8" rx="4"/>
+        <rect x="67" y="130" width="13" height="8" rx="4"/>
+        <rect x="91" y="130" width="13" height="8" rx="4"/>
+        <rect x="107" y="130" width="13" height="8" rx="4"/>
+      </g>
+      <ellipse cx="84" cy="97" rx="44" ry="25" fill="#fff" stroke="#E2D3F4" stroke-width="2"/>
+      <path d="M100 95 C103 80 106 66 111 55 L133 61 C129 75 125 87 124 100 Z" fill="#fff"/>
+      <circle cx="104" cy="44" r="9" fill="#FF6FB5"/>
+      <circle cx="98" cy="56" r="9" fill="#5AA9FF"/>
+      <circle cx="95" cy="69" r="9" fill="#B08CFF"/>
+      <circle cx="95" cy="82" r="8.5" fill="#FF6FB5"/>
+      <circle cx="98" cy="93" r="7" fill="#5AA9FF"/>
+      <ellipse cx="122" cy="53" rx="22" ry="19" fill="#fff" stroke="#E2D3F4" stroke-width="2"/>
+      <ellipse cx="138" cy="63" rx="13" ry="10" fill="#FFE3F1"/>
+      <circle cx="142" cy="61" r="1.8" fill="#C77AA5"/>
+      <circle cx="128" cy="62" r="4" fill="#FF8FB8" opacity=".55"/>
+      <ellipse cx="121" cy="51" rx="3.6" ry="4.6" fill="#23305E"/>
+      <circle cx="122.3" cy="49.3" r="1.3" fill="#fff"/>
+      <circle cx="112" cy="38" r="7" fill="#B08CFF"/>
+      <path d="M107 37 L109 21 L117 33 Z" fill="#fff" stroke="#E2D3F4" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M118 35 L127 7 L131 37 Z" fill="#FFD02E" stroke="#F0B400" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M121 28 L129.5 26 M123.5 20 L129 18.5" stroke="#F0B400" stroke-width="1.6" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div id="app">
+
+  <!-- Home -->
+  <section id="home" class="screen active">
+    <div class="sky">
+      <h1 id="title">Magic Sea</h1>
+      <div class="friends" aria-hidden="true">
+        <div class="friend uni"><svg viewBox="0 0 160 150"><use href="#unicorn-art" width="160" height="150"/></svg></div>
+        <div class="friend mer"><svg viewBox="0 0 120 170"><use href="#mermaid-art" width="120" height="170"/></svg></div>
+      </div>
+    </div>
+    <svg class="waves" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 22 Q75 0 150 22 T300 22 T450 22 T600 22 T750 22 T900 22 T1050 22 T1200 22 V40 H0 Z" fill="#8ED3FF"/>
+    </svg>
+    <div class="sea">
+      <nav class="menu" aria-label="Games">
+        <button class="menu-bubble" type="button" data-game="count" style="--tint:#FF9CCB;--d:-.4s">
+          <span class="orb"><span class="icon emoji" aria-hidden="true">🐚</span></span><span class="cap">Count</span>
+        </button>
+        <button class="menu-bubble" type="button" data-game="colors" style="--tint:#C7AEFF;--d:-1.4s">
+          <span class="orb"><span class="icon emoji" aria-hidden="true">🌈</span></span><span class="cap">Colors</span>
+        </button>
+        <button class="menu-bubble" type="button" data-game="letters" style="--tint:#FFE27A;--d:-2.2s">
+          <span class="orb"><span class="icon-letter" id="letterIcon" aria-hidden="true">A</span></span><span class="cap">Letters</span>
+        </button>
+        <button class="menu-bubble" type="button" data-game="shapes" style="--tint:#8EEAD8;--d:-.9s">
+          <span class="orb"><svg viewBox="0 0 100 100" aria-hidden="true"><g stroke="#fff" stroke-width="4" stroke-linejoin="round">
+            <path d="M30 62 C16 52 9 45 9 36 C9 29 14 24 21 24 C25 24 28 26 30 30 C32 26 35 24 39 24 C46 24 51 29 51 36 C51 45 44 52 30 62 Z" fill="#FF4FA3"/>
+            <path d="M70 12 L92 50 L48 50 Z" fill="#2F7BFF"/>
+            <circle cx="64" cy="74" r="17" fill="#FFD02E"/></g></svg></span><span class="cap">Shapes</span>
+        </button>
+        <button class="menu-bubble" type="button" data-game="bubbles" style="--tint:#6FB8FF;--d:-3s">
+          <span class="orb"><svg viewBox="0 0 100 100" aria-hidden="true"><g fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="5">
+            <circle cx="40" cy="60" r="24"/><circle cx="71" cy="31" r="15"/><circle cx="76" cy="72" r="10"/></g>
+            <circle cx="32" cy="51" r="5" fill="#fff"/><circle cx="66" cy="26" r="3.5" fill="#fff"/></svg></span><span class="cap">Bubbles</span>
+        </button>
+      </nav>
+    </div>
+    <button id="startOverlay" type="button" aria-label="Start playing">
+      <span class="play-orb"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M38 26 L76 50 L38 74 Z" fill="#fff" stroke="#fff" stroke-width="8" stroke-linejoin="round"/></svg></span>
+      <span class="start-text">Tap to play</span>
+    </button>
+  </section>
+
+  <!-- A game in progress -->
+  <section id="game" class="screen">
+    <header class="bar">
+      <button id="homeBtn" class="round-btn" type="button" aria-label="Home">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 14 L90 48 H78 V86 H58 V64 H42 V86 H22 V48 H10 Z" fill="#FF4FA3" stroke="#FF4FA3" stroke-width="6" stroke-linejoin="round"/></svg>
+      </button>
+      <div id="stars" role="img" aria-label="Stars"></div>
+      <div id="popCount" hidden aria-label="Bubbles popped">0</div>
+    </header>
+    <div class="prompt">
+      <button id="replayBtn" class="round-btn" type="button" aria-label="Hear it again">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M16 38 H32 L54 20 V80 L32 62 H16 Z" fill="#2F6FE0" stroke="#2F6FE0" stroke-width="6" stroke-linejoin="round"/><path d="M67 35 Q78 50 67 65 M77 25 Q96 50 77 75" stroke="#2F6FE0" stroke-width="7" fill="none" stroke-linecap="round"/></svg>
+      </button>
+      <p id="promptText" aria-live="polite"></p>
+    </div>
+    <div id="target" hidden></div>
+    <div id="stage" class="stage"></div>
+    <div id="guide" aria-hidden="true"><svg viewBox="0 0 120 170"><use href="#mermaid-art" width="120" height="170"/></svg></div>
+  </section>
+
+  <!-- Five stars! -->
+  <section id="party" class="screen">
+    <div id="confetti" aria-hidden="true"></div>
+    <h1 id="partyTitle">Yay!</h1>
+    <div class="dancers" aria-hidden="true">
+      <div class="dancer d-uni"><svg viewBox="0 0 160 150"><use href="#unicorn-art" width="160" height="150"/></svg></div>
+      <div class="dancer d-mer"><svg viewBox="0 0 120 170"><use href="#mermaid-art" width="120" height="170"/></svg></div>
+    </div>
+    <div id="partyStars" class="party-stars" aria-hidden="true"></div>
+    <div class="party-actions">
+      <button id="againBtn" class="big-btn" type="button">
+        <span class="orb" style="--tint:#FF9CCB"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M74 36 A28 28 0 1 0 78 60" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M62 24 L82 30 L74 49 Z" fill="#fff" stroke="#fff" stroke-width="5" stroke-linejoin="round"/></svg></span>
+        <span>Play again</span>
+      </button>
+      <button id="partyHomeBtn" class="big-btn" type="button">
+        <span class="orb" style="--tint:#6FB8FF"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 14 L90 48 H78 V86 H58 V64 H42 V86 H22 V48 H10 Z" fill="#fff" stroke="#fff" stroke-width="6" stroke-linejoin="round"/></svg></span>
+        <span>Home</span>
+      </button>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ===== Settings: change these for your family ===== */
+  const CONFIG = {
+    name: 'Eevie',     // the player
+    brother: 'Eddie',  // shows up as a helper; set to '' to leave out
+    mermaid: 'Coral',
+    unicorn: 'Sparkle',
+    starsToWin: 5,
+  };
+  // Optional link overrides, e.g. index.html?name=Eevie&brother=Eddie
+  const qs = new URLSearchParams(location.search);
+  for (const key of ['name', 'brother']) {
+    const v = (qs.get(key) || '').trim().slice(0, 24);
+    if (v) CONFIG[key] = v;
+  }
+  const hi = CONFIG.name ? `, ${CONFIG.name}` : '';
+
+  /* ===== Helpers ===== */
+  const $ = (sel) => document.querySelector(sel);
+  const rand = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const shuffle = (arr) => {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  };
+  const sample = (arr, n) => shuffle(arr).slice(0, n);
+  const praise = () => pick([`Great job${hi}!`, 'You did it!', 'Super duper!', 'Hooray!', `You're so smart${hi}!`, 'Wonderful!']);
+
+  /* ===== Voice (built into the browser, works offline) ===== */
+  const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  let voice = null;
+  function pickVoice() {
+    if (!canSpeak) return;
+    const all = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
+    const liked = ['Samantha', 'Google US English', 'Aria', 'Jenny', 'Ava', 'Allison', 'Karen', 'Moira', 'Tessa', 'Serena', 'Zira'];
+    voice = liked.map(n => all.find(v => v.name.includes(n))).find(Boolean)
+      || all.find(v => /en[-_]US/i.test(v.lang)) || all[0] || null;
+  }
+  if (canSpeak) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+
+  function say(text, onDone) {
+    if (!canSpeak || !text) { if (onDone) setTimeout(onDone, 0); return; }
+    const u = new SpeechSynthesisUtterance(text);
+    if (voice) { u.voice = voice; u.lang = voice.lang; } else { u.lang = 'en-US'; }
+    u.rate = 0.9;
+    u.pitch = 1.15;
+    if (onDone) { u.onend = onDone; u.onerror = onDone; }
+    const talking = speechSynthesis.speaking || speechSynthesis.pending;
+    speechSynthesis.cancel();
+    if (talking) setTimeout(() => speechSynthesis.speak(u), 60);
+    else speechSynthesis.speak(u);
+  }
+  // Speak, then move on once the line finishes (with sensible min/max waits).
+  function sayThen(text, next, minMs = 1500, maxMs = 5500) {
+    const t0 = Date.now();
+    let done = false, cap = 0;
+    const finish = () => {
+      if (done) return;
+      done = true; clearTimeout(cap);
+      setTimeout(next, Math.max(0, minMs - (Date.now() - t0)) + 350);
+    };
+    cap = setTimeout(finish, maxMs);
+    say(text, finish);
+  }
+
+  /* ===== Sounds ===== */
+  let ctx = null;
+  function audio() {
+    if (!ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) ctx = new AC(); }
+    if (ctx && ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  function tone(freq, at = 0, dur = 0.3, type = 'triangle', vol = 0.14, slideTo = 0) {
+    const a = audio(); if (!a) return;
+    const t = a.currentTime + at;
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur * 0.6);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(a.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  const NOTES = [523, 587, 659, 784, 880, 1047, 1175, 1319, 1568, 1760];
+  const sfx = {
+    count: (n) => tone(NOTES[Math.min(n - 1, NOTES.length - 1)], 0, 0.35),
+    chime: () => [784, 1047, 1319, 1568].forEach((f, i) => tone(f, i * 0.08, 0.4, 'triangle', 0.12)),
+    oops: () => { tone(392, 0, 0.18, 'sine', 0.1); tone(330, 0.14, 0.25, 'sine', 0.1); },
+    pop: () => tone(rand(480, 640), 0, 0.12, 'sine', 0.22, rand(1300, 1800)),
+    fanfare: () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, i * 0.12, 0.34, 'triangle', 0.13)),
+  };
+
+  /* ===== State & elements ===== */
+  const state = { key: null, stars: 0, busy: false, misses: 0, prompt: '', token: 0, idle: 0, nudges: 0, bubbleTimer: 0, pops: 0, lastLetter: '' };
+  const stage = $('#stage'), targetEl = $('#target'), starBox = $('#stars'), popCount = $('#popCount');
+  const promptText = $('#promptText'), guide = $('#guide'), guideSvg = $('#guide svg'), guideUse = $('#guide use');
+
+  function tap(el, fn) {
+    el.addEventListener('pointerdown', (e) => { if (e.button > 0) return; e.preventDefault(); fn(); });
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } });
+  }
+  function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id)); }
+  function setTheme(t) { document.documentElement.dataset.theme = t; }
+  function restartAnim(el, cls, ms) {
+    el.classList.remove(cls); el.getBoundingClientRect(); el.classList.add(cls);
+    clearTimeout(el._animT); el._animT = setTimeout(() => el.classList.remove(cls), ms);
+  }
+  const cheerGuide = () => restartAnim(guide, 'dance', 950);
+  const wiggle = (el) => restartAnim(el, 'wiggle', 520);
+
+  const ART = { mermaid: [120, 170], unicorn: [160, 150] };
+  function setGuide(which) {
+    const [w, h] = ART[which];
+    guideSvg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    guideUse.setAttribute('href', `#${which}-art`);
+    guideUse.setAttribute('width', w);
+    guideUse.setAttribute('height', h);
+    guide.classList.toggle('is-uni', which === 'unicorn');
+  }
+
+  const STAR = 'M50 6 L61.5 37.5 L95 38 L68.5 58.5 L78 91 L50 72 L22 91 L31.5 58.5 L5 38 L38.5 37.5 Z';
+  const starSvg = (on, pop) => `<svg class="meter-star${on ? ' on' : ''}${pop ? ' pop' : ''}" viewBox="0 0 100 100" aria-hidden="true"><path d="${STAR}"/></svg>`;
+  function renderStars(popLast) {
+    let html = '';
+    for (let i = 0; i < CONFIG.starsToWin; i++) html += starSvg(i < state.stars, popLast && i === state.stars - 1);
+    starBox.innerHTML = html;
+    starBox.setAttribute('aria-label', `${state.stars} of ${CONFIG.starsToWin} stars`);
+  }
+
+  function setPrompt(text) {
+    state.prompt = text;
+    promptText.textContent = text;
+    say(text);
+    armIdle();
+  }
+  // If nobody taps for a while, gently repeat the question (twice at most).
+  function armIdle(reset = true) {
+    clearTimeout(state.idle);
+    if (reset) state.nudges = 0;
+    if (state.nudges >= 2) return;
+    const token = state.token;
+    state.idle = setTimeout(() => {
+      if (token !== state.token || state.busy) return;
+      state.nudges++;
+      say(state.prompt);
+      armIdle(false);
+    }, 15000);
+  }
+
+  function burst(el, count = 10) {
+    const r = el.getBoundingClientRect(); if (!r.width) return;
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement('span');
+      s.className = 'spark emoji';
+      s.textContent = pick(['✨', '💖', '⭐', '💙']);
+      const a = (i / count) * Math.PI * 2 + Math.random() * 0.4;
+      const d = r.width * 0.55 + rand(10, 50);
+      s.style.left = cx + 'px'; s.style.top = cy + 'px';
+      s.style.setProperty('--x', Math.cos(a) * d + 'px');
+      s.style.setProperty('--y', Math.sin(a) * d + 'px');
+      document.body.append(s);
+      setTimeout(() => s.remove(), 900);
+    }
+  }
+
+  function makeBubble(html, label) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'choice'; b.innerHTML = html;
+    b.setAttribute('aria-label', label);
+    b.style.setProperty('--d', (Math.random() * 3).toFixed(2) + 's');
+    stage.append(b);
+    return b;
+  }
+  function setTarget(L, pic = '', word = '') {
+    targetEl.innerHTML = '';
+    const card = document.createElement('div');
+    card.className = 'target-card' + (pic ? ' reveal' : '');
+    const l = document.createElement('span'); l.className = 'letter'; l.textContent = L;
+    card.append(l);
+    if (pic) {
+      const p = document.createElement('span'); p.className = 'pic emoji'; p.textContent = pic;
+      const w = document.createElement('span'); w.className = 'word'; w.textContent = word;
+      card.append(p, w);
+    }
+    targetEl.append(card);
+    targetEl.hidden = false;
+  }
+  function clearTarget() { targetEl.hidden = true; targetEl.innerHTML = ''; }
+
+  /* ===== Round flow ===== */
+  function win(el, line) {
+    state.busy = true;
+    clearTimeout(state.idle);
+    if (el) {
+      if (el.classList.contains('choice')) { el.classList.remove('hint'); el.classList.add('yay'); }
+      burst(el);
+    }
+    sfx.chime();
+    state.stars++;
+    renderStars(true);
+    cheerGuide();
+    const token = state.token;
+    sayThen(line, () => {
+      if (token !== state.token) return;
+      if (state.stars >= CONFIG.starsToWin) party(); else nextRound();
+    });
+  }
+  function oops(el, line) { sfx.oops(); wiggle(el); say(line); }
+
+  // Shared "pick the right one" game: gentle retry, and a glowing hint after two misses.
+  function choiceRound({ options, correct, render, label, prompt, right, wrong, onRight }) {
+    setPrompt(prompt);
+    let correctBtn = null;
+    options.forEach((opt, i) => {
+      const b = makeBubble(render(opt, i), label(opt));
+      if (opt === correct) correctBtn = b;
+      tap(b, () => {
+        if (state.busy) return;
+        armIdle();
+        if (opt === correct) { if (onRight) onRight(); win(b, right); }
+        else {
+          state.misses++;
+          oops(b, wrong(opt));
+          if (state.misses >= 2 && correctBtn) correctBtn.classList.add('hint');
+        }
+      });
+    });
+  }
+
+  /* ===== Game: counting ===== */
+  const COUNT_THINGS = [
+    { e: '🐚', w: 'shells' }, { e: '🐠', w: 'fish' }, { e: '🦀', w: 'crabs' }, { e: '🐬', w: 'dolphins' },
+    { e: '🐙', w: 'octopuses' }, { e: '🐢', w: 'turtles' }, { e: '💖', w: 'hearts' }, { e: '⭐', w: 'stars' },
+    { e: '🦄', w: 'unicorns' }, { e: '🧜‍♀️', w: 'mermaids' }, { e: '🌈', w: 'rainbows' },
+  ];
+  function countRound() {
+    const thing = pick(COUNT_THINGS);
+    const n = rand(2, state.stars >= 3 ? 7 : 5);
+    const who = pick([CONFIG.mermaid, CONFIG.unicorn, CONFIG.brother].filter(Boolean));
+    let counted = 0;
+    stage.classList.add('counting');
+    setPrompt(`${who} found some ${thing.w}! Tap each one to count.`);
+    for (let i = 0; i < n; i++) {
+      const b = makeBubble(`<span class="emoji" aria-hidden="true">${thing.e}</span><span class="num" aria-hidden="true"></span>`, thing.w);
+      b.style.setProperty('--r', rand(-12, 12) + 'deg');
+      tap(b, () => {
+        if (state.busy) return;
+        armIdle();
+        if (b.dataset.n) { say(b.dataset.n); wiggle(b); return; } // already counted: say its number again
+        counted++;
+        b.dataset.n = counted;
+        b.querySelector('.num').textContent = counted;
+        b.classList.add('counted');
+        sfx.count(counted);
+        say(String(counted));
+        if (counted === n) {
+          state.busy = true;
+          const token = state.token;
+          setTimeout(() => {
+            if (token !== state.token) return;
+            const big = document.createElement('div');
+            big.className = 'bignum';
+            stage.classList.add('done');
+            big.innerHTML = `<span>${n}</span>`;
+            stage.append(big);
+            win(big.firstChild, `${n} ${thing.w}! ${pick(['Great counting', 'You counted them all', 'Super counting'])}${hi}!`);
+          }, 800);
+        }
+      });
+    }
+  }
+
+  /* ===== Game: colors ===== */
+  const COLORS = [
+    { n: 'pink', c: '#FF5FAE' }, { n: 'blue', c: '#2F7BFF' }, { n: 'purple', c: '#9A5CF5' }, { n: 'yellow', c: '#FFD02E' },
+    { n: 'green', c: '#2FBF62' }, { n: 'red', c: '#F23D3D' }, { n: 'orange', c: '#FF8A1F' },
+  ];
+  const SHAPES = {
+    circle:   { d: '<circle cx="50" cy="50" r="40"/>', hl: [36, 32] },
+    square:   { d: '<rect x="13" y="13" width="74" height="74" rx="9"/>', hl: [30, 29] },
+    triangle: { d: '<path d="M50 10 L91 86 L9 86 Z"/>', hl: [44, 52] },
+    star:     { d: `<path d="${STAR}"/>`, hl: [42, 46] },
+    heart:    { d: '<path d="M50 88 C22 68 6 52 6 33 C6 18 17 9 30 9 C40 9 46 15 50 23 C54 15 60 9 70 9 C83 9 94 18 94 33 C94 52 78 68 50 88 Z"/>', hl: [28, 28] },
+    diamond:  { d: '<path d="M50 5 L88 50 L50 95 L12 50 Z"/>', hl: [40, 40] },
+  };
+  function shapeSvg(name, color) {
+    const s = SHAPES[name], [hx, hy] = s.hl;
+    return `<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="${color}" stroke="#fff" stroke-width="5" stroke-linejoin="round">${s.d}</g>`
+      + `<ellipse cx="${hx}" cy="${hy}" rx="9" ry="5.5" fill="#fff" opacity=".5" transform="rotate(-35 ${hx} ${hy})"/></svg>`;
+  }
+  function colorRound() {
+    const k = state.stars >= 3 ? 4 : 3;
+    const opts = sample(COLORS, k);
+    const correct = pick(opts);
+    const shape = pick(['heart', 'star', 'circle']);
+    choiceRound({
+      options: opts, correct,
+      render: (o) => shapeSvg(shape, o.c),
+      label: (o) => `${o.n} ${shape}`,
+      prompt: `${CONFIG.unicorn} wants the ${correct.n} ${shape}. Can you find ${correct.n}?`,
+      right: `Yes! That's ${correct.n}! ${praise()}`,
+      wrong: (o) => `That one is ${o.n}. Can you find ${correct.n}?`,
+    });
+  }
+
+  /* ===== Game: shapes ===== */
+  function shapeRound() {
+    const k = state.stars >= 3 ? 4 : 3;
+    const opts = sample(Object.keys(SHAPES), k);
+    const correct = pick(opts);
+    const cols = sample(COLORS, k);
+    choiceRound({
+      options: opts, correct,
+      render: (o, i) => shapeSvg(o, cols[i].c),
+      label: (o) => o,
+      prompt: `Can you find the ${correct}?`,
+      right: `Yes! A ${correct}! ${praise()}`,
+      wrong: (o) => `That's a ${o}. Where is the ${correct}?`,
+    });
+  }
+
+  /* ===== Game: letters ===== */
+  const LETTER_WORDS = [
+    ['M', 'mermaid', '🧜‍♀️'], ['U', 'unicorn', '🦄'], ['S', 'shell', '🐚'], ['F', 'fish', '🐠'],
+    ['P', 'pink', '💗'], ['B', 'blue', '💙'], ['O', 'ocean', '🌊'], ['D', 'dolphin', '🐬'],
+    ['R', 'rainbow', '🌈'], ['C', 'crab', '🦀'], ['H', 'heart', '💖'], ['T', 'turtle', '🐢'], ['W', 'whale', '🐳'],
+  ];
+  const DISTRACTORS = 'BCDEFGHJKLMNOPRSTUVWXYZ'.split(''); // skips A, I, Q (tricky for the voice)
+  const LETTER_BANK = (() => {
+    const bank = [], own = new Set();
+    const n0 = (CONFIG.name[0] || '').toUpperCase();
+    const b0 = (CONFIG.brother[0] || '').toUpperCase();
+    if (/[A-Z]/.test(n0)) {
+      const both = b0 === n0;
+      const e = {
+        L: n0,
+        line: `${n0} is for ${both ? `${CONFIG.name} and ${CONFIG.brother}` : CONFIG.name}!`,
+        pic: both ? '💖💙' : '💖',
+        word: both ? `${CONFIG.name} & ${CONFIG.brother}` : CONFIG.name,
+      };
+      bank.push(e, e, e); own.add(n0); // her letter comes up more often
+    }
+    if (/[A-Z]/.test(b0) && !own.has(b0)) {
+      const e = { L: b0, line: `${b0} is for ${CONFIG.brother}!`, pic: '💙', word: CONFIG.brother };
+      bank.push(e, e); own.add(b0);
+    }
+    for (const [L, word, pic] of LETTER_WORDS) if (!own.has(L)) bank.push({ L, line: `${L} is for ${word}!`, pic, word });
+    return bank;
+  })();
+  function letterRound() {
+    let entry;
+    do { entry = pick(LETTER_BANK); } while (LETTER_BANK.length > 1 && entry.L === state.lastLetter);
+    state.lastLetter = entry.L;
+    const k = state.stars >= 3 ? 4 : 3;
+    const opts = shuffle([entry.L, ...sample(DISTRACTORS.filter(x => x !== entry.L), k - 1)]);
+    const tints = shuffle(['#FF4FA3', '#2F7BFF', '#8B55F0', '#0E9AA0']);
+    setTarget(entry.L);
+    choiceRound({
+      options: opts, correct: entry.L,
+      render: (o, i) => `<span class="letter" style="--c:${tints[i]}">${o}</span>`,
+      label: (o) => `Letter ${o}`,
+      prompt: `Find the letter ${entry.L}!`,
+      right: `Yes! That's ${entry.L}! ${entry.line}`,
+      wrong: (o) => `That's ${o}. Can you find ${entry.L}?`,
+      onRight: () => setTarget(entry.L, entry.pic, entry.word),
+    });
+  }
+
+  /* ===== Game: bubble pop (free play) ===== */
+  function bubbleStart() {
+    state.pops = 0;
+    popCount.textContent = '0';
+    stage.className = 'stage bubbles';
+    stage.innerHTML = '';
+    clearTarget();
+    setPrompt(`Pop the bubbles${hi}!`);
+    const token = state.token;
+    for (let i = 0; i < 4; i++) setTimeout(() => { if (token === state.token) spawnBubble(); }, i * 300);
+    state.bubbleTimer = setInterval(spawnBubble, 750);
+  }
+  function spawnBubble() {
+    if (document.hidden || stage.childElementCount > 14) return;
+    const col = pick(COLORS);
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'bubble';
+    b.setAttribute('aria-label', `${col.n} bubble`);
+    b.style.cssText = `--c:${col.c};--s:${rand(76, 132)}px;left:${rand(2, 86)}%;--dur:${rand(70, 110) / 10}s;--sway:${rand(14, 34)}px`;
+    if (Math.random() < 0.35) b.innerHTML = `<span class="emoji" aria-hidden="true">${pick(['🐠', '🐚', '💖', '⭐', '🦄', '🐬', '🦀'])}</span>`;
+    b.addEventListener('animationend', (e) => { if (e.target === b) b.remove(); });
+    tap(b, () => popBubble(b, col));
+    stage.append(b);
+  }
+  function popBubble(b, col) {
+    if (b.classList.contains('popped')) return;
+    armIdle();
+    burst(b, 6);
+    const m = getComputedStyle(b).transform; // freeze where it is, then pop
+    b.style.transform = m === 'none' ? '' : m;
+    b.style.animation = 'popped .26s ease-out forwards';
+    b.classList.add('popped');
+    sfx.pop();
+    state.pops++;
+    popCount.textContent = state.pops;
+    if (state.pops % 10 === 0) { sfx.fanfare(); cheerGuide(); say(`${state.pops} bubbles! Wow${hi}!`); }
+    else say(col.n);
+    setTimeout(() => b.remove(), 280);
+  }
+
+  /* ===== Screens ===== */
+  const GAMES = {
+    count:   { theme: 'count',   guide: 'mermaid', round: countRound },
+    colors:  { theme: 'colors',  guide: 'unicorn', round: colorRound },
+    letters: { theme: 'letters', guide: 'mermaid', round: letterRound },
+    shapes:  { theme: 'shapes',  guide: 'unicorn', round: shapeRound },
+    bubbles: { theme: 'bubbles', guide: 'mermaid', endless: true, start: bubbleStart },
+  };
+  function startGame(key) {
+    const g = GAMES[key]; if (!g) return;
+    audio();
+    state.token++;
+    state.key = key; state.stars = 0; state.busy = false;
+    clearInterval(state.bubbleTimer); clearTimeout(state.idle);
+    setTheme(g.theme); setGuide(g.guide);
+    starBox.hidden = !!g.endless;
+    popCount.hidden = !g.endless;
+    renderStars();
+    show('game');
+    if (g.endless) g.start(); else nextRound();
+  }
+  function nextRound() {
+    state.busy = false; state.misses = 0;
+    stage.className = 'stage'; stage.innerHTML = '';
+    clearTarget();
+    GAMES[state.key].round();
+  }
+  function party() {
+    state.token++; state.busy = true;
+    clearTimeout(state.idle);
+    setTheme('party'); show('party');
+    $('#partyTitle').textContent = CONFIG.name ? `Yay, ${CONFIG.name}!` : 'Yay!';
+    let s = '';
+    for (let i = 0; i < CONFIG.starsToWin; i++) s += starSvg(true);
+    $('#partyStars').innerHTML = s;
+    const box = $('#confetti'); box.innerHTML = '';
+    const bits = ['💖', '💙', '⭐', '🦄', '🐚', '🌈', '✨', '🧜‍♀️'];
+    for (let i = 0; i < 34; i++) {
+      const c = document.createElement('span');
+      c.className = 'emoji'; c.textContent = pick(bits);
+      c.style.left = rand(0, 96) + '%';
+      c.style.fontSize = rand(22, 46) + 'px';
+      c.style.animationDuration = rand(40, 75) / 10 + 's';
+      c.style.animationDelay = -rand(0, 70) / 10 + 's';
+      box.append(c);
+    }
+    sfx.fanfare();
+    const token = state.token;
+    const cheer = CONFIG.brother ? `${CONFIG.brother} says you're a superstar!` : `You're a superstar!`;
+    setTimeout(() => { if (token === state.token) say(`Yay${hi}! You got all ${CONFIG.starsToWin} stars! ${cheer}`); }, 500);
+  }
+  function goHome() {
+    state.token++; state.key = null; state.busy = false;
+    clearTimeout(state.idle); clearInterval(state.bubbleTimer);
+    stage.innerHTML = ''; $('#confetti').innerHTML = '';
+    setTheme('home'); show('home');
+    say('Pick a game!');
+  }
+
+  /* ===== Setup ===== */
+  function buildTitle() {
+    const text = CONFIG.name ? `${CONFIG.name}'s Magic Sea` : 'Magic Sea';
+    document.title = text;
+    const h = $('#title');
+    h.textContent = '';
+    h.setAttribute('aria-label', text);
+    let i = 0;
+    text.split(' ').forEach((word, wi) => {
+      if (wi) h.append(' ');
+      const w = document.createElement('span'); w.className = 'w'; w.setAttribute('aria-hidden', 'true');
+      for (const ch of word) {
+        const l = document.createElement('span');
+        l.className = 'l' + (i % 2 ? ' p' : '');
+        l.style.setProperty('--i', i++);
+        l.textContent = ch;
+        w.append(l);
+      }
+      h.append(w);
+    });
+  }
+  buildTitle();
+  const initial = (CONFIG.name[0] || 'A').toUpperCase();
+  $('#letterIcon').textContent = /[A-Z]/.test(initial) ? initial : 'A';
+  setTheme('home');
+  renderStars();
+
+  const overlay = $('#startOverlay');
+  overlay.addEventListener('click', () => {
+    audio(); pickVoice();
+    overlay.classList.add('gone');
+    overlay.tabIndex = -1;
+    overlay.setAttribute('aria-hidden', 'true');
+    sfx.chime();
+    say(`Hi${hi}! Pick a game to play!`);
+  });
+  document.querySelectorAll('.menu-bubble').forEach(b => tap(b, () => startGame(b.dataset.game)));
+  tap($('#homeBtn'), goHome);
+  tap($('#partyHomeBtn'), goHome);
+  tap($('#againBtn'), () => startGame(state.key || 'count'));
+  tap($('#replayBtn'), () => { say(state.prompt); armIdle(); });
+
+  document.addEventListener('pointerup', () => { if (ctx) audio(); }, { passive: true });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && canSpeak) speechSynthesis.cancel(); });
+  document.addEventListener('gesturestart', (e) => e.preventDefault());
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+})();
+</script>
+</body>
+</html>
