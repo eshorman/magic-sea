@@ -1,0 +1,2 @@
+# magic-sea
+Educational game
