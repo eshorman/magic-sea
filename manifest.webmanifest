@@ -1,0 +1,15 @@
+{
+  "name": "Magic Sea",
+  "short_name": "Magic Sea",
+  "description": "Counting, colors, letters, shapes and bubbles with a mermaid and a unicorn.",
+  "display": "standalone",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "background_color": "#FFD3E8",
+  "theme_color": "#FFD3E8",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

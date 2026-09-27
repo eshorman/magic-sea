@@ -9,6 +9,9 @@
 
   To change the names, edit CONFIG at the top of the <script> below,
   or put them in the link instead:   index.html?name=Eevie&brother=Eddie
+
+  Voice: press and hold the gear in the corner of the home screen to pick one.
+  Offline: keep sw.js, manifest.webmanifest and the two icons next to this file.
 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,6 +21,8 @@
 <meta name="theme-color" content="#FFE3F1">
 <title>Magic Sea</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='44' fill='%23FF6FB5'/%3E%3Ccircle cx='36' cy='34' r='10' fill='%23fff' opacity='.8'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Andika:wght@700&family=Grandstander:wght@600;700;800&display=swap" rel="stylesheet">
@@ -194,6 +199,24 @@ button:focus-visible{outline:4px solid var(--sun);outline-offset:4px}
 .big-btn .orb{--o:clamp(84px,19vmin,136px);animation:none}
 .big-btn:active .orb{scale:.92}
 
+/* ---------- Voice picker (grown-ups) ---------- */
+#voiceGear{position:absolute;right:max(12px,env(safe-area-inset-right,0px));bottom:12px;z-index:5;width:46px;height:46px;border:0;padding:0;border-radius:50%;background:none;opacity:.55;transition:transform .25s ease,opacity .2s}
+#voiceGear svg{width:100%;height:100%}
+#voiceGear.holding{transform:rotate(180deg);opacity:1;transition:transform 1.2s linear,opacity .2s}
+.sheet{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(20,40,90,.45)}
+.sheet-card{width:min(100%,460px);max-height:100%;display:flex;flex-direction:column;gap:12px;padding:22px 20px 18px;background:var(--pearl);border-radius:28px;box-shadow:0 20px 50px rgba(10,30,80,.35);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-user-select:none;user-select:none}
+.sheet-card h2{margin:0;font-size:1.3rem}
+.sheet-note{margin:0;font-size:.92rem;line-height:1.4;color:#4A5680}
+#voiceList{list-style:none;margin:0;padding:2px;min-height:60px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;display:flex;flex-direction:column;gap:6px}
+.voice-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:2px solid #E6DDF3;border-radius:16px;background:#fff;text-align:left}
+.voice-row[aria-pressed="true"]{border-color:var(--pink);background:#FFF0F7}
+.voice-text{display:flex;flex-direction:column;gap:2px}
+.voice-name{font-weight:700;font-size:1rem}
+.voice-meta{font-size:.82rem;color:#4A5680}
+.check{font-weight:800;color:var(--pink);visibility:hidden}
+.voice-row[aria-pressed="true"] .check{visibility:visible}
+#voiceDone{align-self:flex-end;border:0;border-radius:999px;padding:10px 24px;background:var(--blue);color:#fff;font-weight:700;font-size:1rem}
+
 @keyframes bob{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-10px) rotate(var(--r,0deg))}}
 @keyframes wiggle{0%,100%{transform:translateX(0)}20%{transform:translateX(-12px) rotate(-6deg)}40%{transform:translateX(10px) rotate(5deg)}60%{transform:translateX(-7px) rotate(-3deg)}80%{transform:translateX(4px)}}
 @keyframes glow{0%,100%{box-shadow:inset 0 0 0 3px rgba(255,255,255,.8),0 0 0 0 rgba(255,208,46,0)}50%{box-shadow:inset 0 0 0 3px rgba(255,255,255,.8),0 0 0 16px rgba(255,208,46,.6)}}
@@ -319,6 +342,14 @@ button:focus-visible{outline:4px solid var(--sun);outline-offset:4px}
         </button>
       </nav>
     </div>
+    <button id="voiceGear" type="button" aria-label="Choose the voice (press and hold)">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#fff">
+        <rect x="42" y="4" width="16" height="24" rx="5"/><rect x="42" y="4" width="16" height="24" rx="5" transform="rotate(45 50 50)"/>
+        <rect x="42" y="4" width="16" height="24" rx="5" transform="rotate(90 50 50)"/><rect x="42" y="4" width="16" height="24" rx="5" transform="rotate(135 50 50)"/>
+        <rect x="42" y="4" width="16" height="24" rx="5" transform="rotate(180 50 50)"/><rect x="42" y="4" width="16" height="24" rx="5" transform="rotate(225 50 50)"/>
+        <rect x="42" y="4" width="16" height="24" rx="5" transform="rotate(270 50 50)"/><rect x="42" y="4" width="16" height="24" rx="5" transform="rotate(315 50 50)"/>
+        <circle cx="50" cy="50" r="31"/></g><circle cx="50" cy="50" r="12" fill="#1F66BC"/></svg>
+    </button>
     <button id="startOverlay" type="button" aria-label="Start playing">
       <span class="play-orb"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M38 26 L76 50 L38 74 Z" fill="#fff" stroke="#fff" stroke-width="8" stroke-linejoin="round"/></svg></span>
       <span class="start-text">Tap to play</span>
@@ -365,6 +396,16 @@ button:focus-visible{outline:4px solid var(--sun);outline-offset:4px}
       </button>
     </div>
   </section>
+  <!-- Voice picker, for grown-ups -->
+  <div id="voiceSheet" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="voiceTitle">
+    <div class="sheet-card">
+      <h2 id="voiceTitle">Choose a voice</h2>
+      <p class="sheet-note">Tap a voice to hear it. Your pick is saved on this device.</p>
+      <ul id="voiceList"></ul>
+      <p class="sheet-note">On Android, more voices come from Settings, then Text-to-speech. Downloaded iPhone voices can't be used by web pages.</p>
+      <button id="voiceDone" type="button">Done</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -399,15 +440,37 @@ button:focus-visible{outline:4px solid var(--sun);outline-offset:4px}
   const sample = (arr, n) => shuffle(arr).slice(0, n);
   const praise = () => pick([`Great job${hi}!`, 'You did it!', 'Super duper!', 'Hooray!', `You're so smart${hi}!`, 'Wonderful!']);
 
-  /* ===== Voice (built into the browser, works offline) ===== */
+  /* ===== Voice (built into the device, works offline) ===== */
   const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  const VOICE_KEY = 'magicSea.voice';
+  // Joke and robotic voices that some devices list alongside the real ones.
+  const NOVELTY = /\b(albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|junior|ralph|fred|kathy|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley)\b/i;
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage off: pick lasts this session */ } },
+  };
   let voice = null;
+  function voiceScore(v) {
+    const id = `${v.name} ${v.voiceURI}`.toLowerCase();
+    let s = 0;
+    if (id.includes('premium')) s += 60;
+    if (/enhanced|neural|natural|wavenet|studio/.test(id)) s += 40;
+    if (/samantha|ava|zoe|allison|susan|aria|jenny|google us english/.test(id)) s += 15;
+    if (/en[-_]us/i.test(v.lang)) s += 8; else if (/en[-_](gb|au|ie|ca|nz)/i.test(v.lang)) s += 4;
+    if (v.localService) s += 5;
+    return s;
+  }
+  function rankedVoices() {
+    if (!canSpeak) return [];
+    const seen = new Set();
+    return speechSynthesis.getVoices()
+      .filter(v => /^en/i.test(v.lang) && !NOVELTY.test(v.name) && !seen.has(v.voiceURI) && seen.add(v.voiceURI))
+      .sort((a, b) => voiceScore(b) - voiceScore(a));
+  }
   function pickVoice() {
-    if (!canSpeak) return;
-    const all = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
-    const liked = ['Samantha', 'Google US English', 'Aria', 'Jenny', 'Ava', 'Allison', 'Karen', 'Moira', 'Tessa', 'Serena', 'Zira'];
-    voice = liked.map(n => all.find(v => v.name.includes(n))).find(Boolean)
-      || all.find(v => /en[-_]US/i.test(v.lang)) || all[0] || null;
+    const list = rankedVoices();
+    const saved = store.get(VOICE_KEY);
+    voice = (saved && list.find(v => v.voiceURI === saved)) || list[0] || null;
   }
   if (canSpeak) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 
@@ -415,9 +478,17 @@ button:focus-visible{outline:4px solid var(--sun);outline-offset:4px}
     if (!canSpeak || !text) { if (onDone) setTimeout(onDone, 0); return; }
     const u = new SpeechSynthesisUtterance(text);
     if (voice) { u.voice = voice; u.lang = voice.lang; } else { u.lang = 'en-US'; }
-    u.rate = 0.9;
-    u.pitch = 1.15;
-    if (onDone) { u.onend = onDone; u.onerror = onDone; }
+    u.rate = 0.92;  // a touch slower for little ears
+    u.pitch = 1;    // raising pitch makes most voices sound robotic
+    u.onend = onDone || null;
+    u.onerror = (e) => {
+      // An online-only voice with no connection: switch to one on the device.
+      if (voice && !voice.localService && e && e.error && !/interrupted|canceled/.test(e.error)) {
+        const local = rankedVoices().find(v => v.localService);
+        if (local) voice = local;
+      }
+      if (onDone) onDone();
+    };
     const talking = speechSynthesis.speaking || speechSynthesis.pending;
     speechSynthesis.cancel();
     if (talking) setTimeout(() => speechSynthesis.speak(u), 60);
@@ -883,10 +954,77 @@ button:focus-visible{outline:4px solid var(--sun);outline-offset:4px}
   tap($('#againBtn'), () => startGame(state.key || 'count'));
   tap($('#replayBtn'), () => { say(state.prompt); armIdle(); });
 
+  /* ===== Voice picker (parents: press and hold the gear on the home screen) ===== */
+  const gear = $('#voiceGear'), sheet = $('#voiceSheet'), voiceList = $('#voiceList');
+  const REGION = { us: 'US English', gb: 'British English', au: 'Australian English', ie: 'Irish English', ca: 'Canadian English', nz: 'New Zealand English', in: 'Indian English', za: 'South African English' };
+  const sampleLine = () => `Hi${hi}! Let's count. One, two, three! Can you find the pink star?`;
+  function describeVoice(v) {
+    const region = (v.lang.split(/[-_]/)[1] || '').toLowerCase();
+    return (REGION[region] || 'English') + (v.localService ? ', works offline' : ', needs internet');
+  }
+  function renderVoiceList() {
+    voiceList.innerHTML = '';
+    const list = rankedVoices();
+    if (!list.length) {
+      const li = document.createElement('li');
+      li.className = 'sheet-note';
+      li.textContent = 'This browser has no English voices available.';
+      voiceList.append(li);
+      return;
+    }
+    list.forEach((v) => {
+      const li = document.createElement('li');
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'voice-row';
+      b.setAttribute('aria-pressed', String(!!voice && v.voiceURI === voice.voiceURI));
+      const text = document.createElement('span'); text.className = 'voice-text';
+      const name = document.createElement('span'); name.className = 'voice-name'; name.textContent = v.name;
+      const meta = document.createElement('span'); meta.className = 'voice-meta'; meta.textContent = describeVoice(v);
+      const check = document.createElement('span'); check.className = 'check'; check.textContent = '✓'; check.setAttribute('aria-hidden', 'true');
+      text.append(name, meta);
+      b.append(text, check);
+      b.addEventListener('click', () => {
+        voice = v;
+        store.set(VOICE_KEY, v.voiceURI);
+        voiceList.querySelectorAll('.voice-row').forEach(r => r.setAttribute('aria-pressed', String(r === b)));
+        say(sampleLine());
+      });
+      li.append(b);
+      voiceList.append(li);
+    });
+  }
+  function openVoices() {
+    pickVoice();
+    renderVoiceList();
+    sheet.hidden = false;
+    $('#voiceDone').focus();
+  }
+  function closeVoices() {
+    sheet.hidden = true;
+    if (canSpeak) speechSynthesis.cancel();
+  }
+  let holdTimer = 0;
+  const endHold = () => { clearTimeout(holdTimer); gear.classList.remove('holding'); };
+  gear.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    gear.classList.add('holding');
+    holdTimer = setTimeout(() => { endHold(); openVoices(); }, 1200);
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => gear.addEventListener(t, endHold));
+  gear.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openVoices(); } });
+  $('#voiceDone').addEventListener('click', closeVoices);
+  sheet.addEventListener('click', (e) => { if (e.target === sheet) closeVoices(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !sheet.hidden) closeVoices(); });
+
   document.addEventListener('pointerup', () => { if (ctx) audio(); }, { passive: true });
   document.addEventListener('visibilitychange', () => { if (document.hidden && canSpeak) speechSynthesis.cancel(); });
   document.addEventListener('gesturestart', (e) => e.preventDefault());
   document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  // Save the game on the device for offline play (works once it's on GitHub Pages).
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
 })();
 </script>
 </body>
